@@ -1,6 +1,5 @@
-// src/components/MapComponent.jsx
-
 import React, { useState, useCallback } from "react";
+
 import {
   GoogleMap,
   useJsApiLoader,
@@ -10,7 +9,7 @@ import { GOOGLE_MAPS_LIBRARIES } from "../constants";
 
 const containerStyle = {
   width: "100%",
-  height: "1000px",
+  height: "100vh",
 };
 
 const center = {
@@ -20,9 +19,11 @@ const center = {
 
 const MapComponent = ({ onPolygonComplete }) => {
   const { isLoaded } = useJsApiLoader({
-    googleMapsApiKey: "AIzaSyCEUrQ3YfiDOnpK5WIDJOCfW6KnJraMM_w", // Replace with your API key
+    googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY, // Replace with your API key
     libraries: GOOGLE_MAPS_LIBRARIES, // Use the constant here
   });
+
+  console.log(process.env.REACT_APP_GOOGLE_MAPS_API_KEY);
 
   const [map, setMap] = useState(null);
 
