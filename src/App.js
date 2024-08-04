@@ -51,15 +51,6 @@ function App() {
       setPolygons([...polygons, newPolygon]);
       setPolyCoords([]);
       setDoneButtonVisible(false);
-
-      // Center map on the newly drawn polygon
-      if (map) {
-        const bounds = new window.google.maps.LatLngBounds();
-        polyCoords.forEach((coord) =>
-          bounds.extend(new window.google.maps.LatLng(coord.lat, coord.lng))
-        );
-        map.fitBounds(bounds);
-      }
     }
   };
 
@@ -67,12 +58,6 @@ function App() {
     setPolyCoords([]);
     setPolygons([]);
     setDoneButtonVisible(false);
-
-    // Reset the map center if needed
-    if (map) {
-      map.setCenter(center);
-      map.setZoom(16);
-    }
   };
 
   const saveBtn = () => {
@@ -159,10 +144,7 @@ function App() {
             lat: firstFeature.geometry.coordinates[0][0][1],
             lng: firstFeature.geometry.coordinates[0][0][0],
           };
-          if (map) {
-            map.setCenter(centerLatLng);
-            map.setZoom(16);
-          }
+          setMap((map) => map && map.setCenter(centerLatLng)); // Set map center to the first polygon's center
         }
       };
       reader.readAsText(file);
