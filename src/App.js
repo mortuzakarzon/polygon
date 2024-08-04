@@ -3,8 +3,8 @@ import { GoogleMap, LoadScript, Polygon } from "@react-google-maps/api";
 import "./App.css";
 
 const containerStyle = {
-  width: "90%",
-  height: "60vh",
+  width: "100%",
+  height: "100vh",
 };
 
 const center = {
@@ -182,27 +182,28 @@ function App() {
           <input type="file" id="geoJsonUpload" accept=".geojson,.json" />
           <button id="uploadButton">Upload GeoJSON</button>
         </div>
+
+        <div id="coordinates" className="coordinates-list">
+          {polyCoords.map((coord, index) => (
+            <div key={index}>
+              Coordinate {index + 1}: {coord.lat}, {coord.lng}
+              <button
+                onClick={() => {
+                  const newCoords = polyCoords.filter((_, i) => i !== index);
+                  setPolyCoords(newCoords);
+                  if (newCoords.length < 3) {
+                    setDoneButtonVisible(false);
+                  }
+                }}
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div id="coordinates" className="coordinates-list">
-        {polyCoords.map((coord, index) => (
-          <div key={index}>
-            Coordinate {index + 1}: {coord.lat}, {coord.lng}
-            <button
-              onClick={() => {
-                const newCoords = polyCoords.filter((_, i) => i !== index);
-                setPolyCoords(newCoords);
-                if (newCoords.length < 3) {
-                  setDoneButtonVisible(false);
-                }
-              }}
-            >
-              Remove
-            </button>
-          </div>
-        ))}
-      </div>
-      <div id="areaList">
+      <div id="areaList" className="arealist-container">
         {polygons.map((polygon, index) => (
           <div key={index}>
             <span>Area {index + 1}</span>
