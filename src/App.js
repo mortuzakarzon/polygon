@@ -1,11 +1,10 @@
 import React, { useState, useRef } from "react";
-import { GoogleMap, LoadScript, Polygon } from "@react-google-maps/api";
 import "./App.css";
-
-const containerStyle = {
-  width: "90%",
-  height: "100vh",
-};
+import MapContainer from "./components/MapContainer";
+import CoordinatesList from "./components/CoordinatesList";
+import ControlPanel from "./components/ControlPanel";
+import AreaList from "./components/AreaList";
+import "./App.css";
 
 const center = {
   lat: 48.09041,
@@ -51,6 +50,15 @@ function App() {
       setPolygons([...polygons, newPolygon]);
       setPolyCoords([]);
       setDoneButtonVisible(false);
+
+      // Center map on the newly drawn polygon
+      if (map) {
+        const bounds = new window.google.maps.LatLngBounds();
+        polyCoords.forEach((coord) =>
+          bounds.extend(new window.google.maps.LatLng(coord.lat, coord.lng))
+        );
+        map.fitBounds(bounds);
+      }
     }
   };
 
@@ -58,6 +66,12 @@ function App() {
     setPolyCoords([]);
     setPolygons([]);
     setDoneButtonVisible(false);
+
+    // Reset the map center if needed
+    if (map) {
+      map.setCenter(center);
+      map.setZoom(16);
+    }
   };
 
   const saveBtn = () => {
@@ -144,7 +158,10 @@ function App() {
             lat: firstFeature.geometry.coordinates[0][0][1],
             lng: firstFeature.geometry.coordinates[0][0][0],
           };
-          setMap((map) => map && map.setCenter(centerLatLng)); // Set map center to the first polygon's center
+          if (map) {
+            map.setCenter(centerLatLng);
+            map.setZoom(16);
+          }
         }
       };
       reader.readAsText(file);
@@ -156,111 +173,31 @@ function App() {
   return (
     <div id="container">
       <div id="map">
-        <LoadScript
-          googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
-        >
-          <GoogleMap
-            mapContainerStyle={containerStyle}
-            center={center}
-            zoom={16}
-            onLoad={(map) => setMap(map)}
-            onClick={onMapClick}
-          >
-            {polygons.map((polygon, index) => (
-              <Polygon
-                key={index}
-                paths={polygon.paths}
-                options={polygon.options}
-                editable
-                draggable
-                onMouseUp={() => onEdit(index)}
-                onDragEnd={() => onEdit(index)}
-                onLoad={(polygon) => handlePolygonLoad(polygon, index)}
-              />
-            ))}
-            {polyCoords.length > 0 && (
-              <Polygon
-                paths={polyCoords}
-                options={polyOptions}
-                editable
-                draggable
-                onMouseUp={() => onEdit(polygons.length, true)}
-                onDragEnd={() => onEdit(polygons.length, true)}
-                onLoad={(polygon) =>
-                  handlePolygonLoad(polygon, polygons.length, true)
-                }
-              />
-            )}
-          </GoogleMap>
-        </LoadScript>
+        <MapContainer
+          center={center}
+          map={map}
+          setMap={setMap}
+          polygons={polygons}
+          polyCoords={polyCoords}
+          onMapClick={onMapClick}
+          onEdit={onEdit}
+          handlePolygonLoad={handlePolygonLoad}
+        />
       </div>
       <div className="coordinates-container">
-        <div className="header">
-          <input
-            type="text"
-            id="locationName"
-            placeholder="Enter location name"
-          />
-          <br />
-          <button
-            onClick={doneBtn}
-            style={{ display: doneButtonVisible ? "inline" : "none" }}
-          >
-            Done
-          </button>
-          <button onClick={resetBtn}>Reset</button>
-          <button onClick={saveBtn}>Save</button>
-          <input
-            type="file"
-            id="geoJsonUpload"
-            accept=".geojson,.json"
-            onChange={handleFileUpload}
-          />
-          <button id="uploadButton">Upload GeoJSON</button>
-        </div>
-
-        <div id="coordinates" className="coordinates-list">
-          {polyCoords.map((coord, index) => (
-            <div key={index}>
-              Coordinate {index + 1}: {coord.lat}, {coord.lng}
-              <button
-                onClick={() => {
-                  const newCoords = polyCoords.filter((_, i) => i !== index);
-                  setPolyCoords(newCoords);
-                  if (newCoords.length < 3) {
-                    setDoneButtonVisible(false);
-                  }
-                }}
-              >
-                Remove
-              </button>
-            </div>
-          ))}
-        </div>
+        <ControlPanel
+          doneButtonVisible={doneButtonVisible}
+          doneBtn={doneBtn}
+          resetBtn={resetBtn}
+          saveBtn={saveBtn}
+          handleFileUpload={handleFileUpload}
+        />
+        <CoordinatesList
+          polyCoords={polyCoords}
+          setPolyCoords={setPolyCoords}
+        />
       </div>
-
-      <div id="areaList" className="arealist-container">
-        {polygons.map((polygon, index) => (
-          <div key={index}>
-            <span>Area {index + 1}</span>
-            <button
-              onClick={() => {
-                const newPolygons = polygons.filter((_, i) => i !== index);
-                setPolygons(newPolygons);
-              }}
-            >
-              Remove Area
-            </button>
-            <ul>
-              {polygon.paths.map((coord, i) => (
-                <li key={i}>
-                  Coordinate {i + 1}: {coord.lat}, {coord.lng}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
+      <AreaList polygons={polygons} setPolygons={setPolygons} />
     </div>
   );
 }
