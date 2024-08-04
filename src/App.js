@@ -156,7 +156,9 @@ function App() {
   return (
     <div id="container">
       <div id="map">
-        <LoadScript googleMapsApiKey="AIzaSyCEUrQ3YfiDOnpK5WIDJOCfW6KnJraMM_w">
+        <LoadScript
+          googleMapsApiKey={process.env.AIzaSyCEUrQ3YfiDOnpK5WIDJOCfW6KnJraMM_w}
+        >
           <GoogleMap
             mapContainerStyle={containerStyle}
             center={center}
