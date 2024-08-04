@@ -157,7 +157,7 @@ function App() {
     <div id="container">
       <div id="map">
         <LoadScript
-          googleMapsApiKey={process.env.AIzaSyCEUrQ3YfiDOnpK5WIDJOCfW6KnJraMM_w}
+          googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
         >
           <GoogleMap
             mapContainerStyle={containerStyle}
