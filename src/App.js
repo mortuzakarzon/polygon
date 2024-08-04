@@ -124,6 +124,35 @@ function App() {
     }
   };
 
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const geoJson = JSON.parse(e.target.result);
+        const newPolygons = geoJson.features.map((feature) => ({
+          paths: feature.geometry.coordinates[0].map((coord) => ({
+            lat: coord[1],
+            lng: coord[0],
+          })),
+          options: polyOptions,
+        }));
+        setPolygons(newPolygons);
+        if (newPolygons.length > 0) {
+          const firstFeature = geoJson.features[0];
+          const centerLatLng = {
+            lat: firstFeature.geometry.coordinates[0][0][1],
+            lng: firstFeature.geometry.coordinates[0][0][0],
+          };
+          setMap((map) => map && map.setCenter(centerLatLng)); // Set map center to the first polygon's center
+        }
+      };
+      reader.readAsText(file);
+    } else {
+      alert("Please select a GeoJSON file.");
+    }
+  };
+
   return (
     <div id="container">
       <div id="map">
@@ -179,7 +208,12 @@ function App() {
           </button>
           <button onClick={resetBtn}>Reset</button>
           <button onClick={saveBtn}>Save</button>
-          <input type="file" id="geoJsonUpload" accept=".geojson,.json" />
+          <input
+            type="file"
+            id="geoJsonUpload"
+            accept=".geojson,.json"
+            onChange={handleFileUpload}
+          />
           <button id="uploadButton">Upload GeoJSON</button>
         </div>
 
