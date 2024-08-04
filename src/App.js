@@ -3,7 +3,7 @@ import { GoogleMap, LoadScript, Polygon } from "@react-google-maps/api";
 import "./App.css";
 
 const containerStyle = {
-  width: "100%",
+  width: "90%",
   height: "100vh",
 };
 
@@ -51,6 +51,15 @@ function App() {
       setPolygons([...polygons, newPolygon]);
       setPolyCoords([]);
       setDoneButtonVisible(false);
+
+      // Center map on the newly drawn polygon
+      if (map) {
+        const bounds = new window.google.maps.LatLngBounds();
+        polyCoords.forEach((coord) =>
+          bounds.extend(new window.google.maps.LatLng(coord.lat, coord.lng))
+        );
+        map.fitBounds(bounds);
+      }
     }
   };
 
@@ -58,6 +67,12 @@ function App() {
     setPolyCoords([]);
     setPolygons([]);
     setDoneButtonVisible(false);
+
+    // Reset the map center if needed
+    if (map) {
+      map.setCenter(center);
+      map.setZoom(16);
+    }
   };
 
   const saveBtn = () => {
@@ -144,7 +159,10 @@ function App() {
             lat: firstFeature.geometry.coordinates[0][0][1],
             lng: firstFeature.geometry.coordinates[0][0][0],
           };
-          setMap((map) => map && map.setCenter(centerLatLng)); // Set map center to the first polygon's center
+          if (map) {
+            map.setCenter(centerLatLng);
+            map.setZoom(16);
+          }
         }
       };
       reader.readAsText(file);
